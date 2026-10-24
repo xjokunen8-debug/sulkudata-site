@@ -154,7 +154,7 @@ h1, h2, h3 { text-wrap: balance; }
 .a4 .page .ttl { display: grid; gap: 6px; }
 .a4 .page .ttl b { font-weight: 700; font-size: clamp(26px, 3.4vw, 40px); letter-spacing: -.03em; line-height: 1; }
 .a4 .page .ttl span { font-size: 14px; color: var(--lake-grey); }
-.a4 .page svg { display: block; width: 100%; margin-bottom: 16px; }
+.a4 .page #kv-mini { display: block; width: 100%; margin-bottom: 16px; }
 .a4 .page .big { font-weight: 700; font-size: clamp(36px, 5.4vw, 60px); letter-spacing: -.04em; color: var(--lake-red); line-height: 1; }
 .a4 .page .cap { color: var(--lake-grey); font-size: 13px; margin: 8px 0 0; }
 .a4 .page .ft { display: flex; justify-content: space-between; font-size: 11px; color: var(--lake-grey); border-top: 1px solid var(--lake-line); padding-top: 8px; gap: 8px; }
@@ -391,7 +391,7 @@ h1, h2, h3 { text-wrap: balance; }
   function draw(svg, full) {
     const W = Math.round(svg.getBoundingClientRect().width); if (!W) return;
     const inner = Math.min(W, 1120), pad = full ? Math.max((W - inner) / 2 + (W < 480 ? 16 : 24), 16) : 0;
-    const H = full ? (W < 600 ? 240 : 320) : 96, T = full ? 70 : 30, B = full ? 34 : 4;
+    const H = full ? (W < 600 ? 240 : 320) : 104, T = full ? 70 : 42, B = full ? 34 : 4;
     const t0 = K.pts[0][0] - 3600, t1 = K.alkaa, lo = 3.85, hi = 4.40;
     const x = t => pad + (t - t0) / (t1 - t0) * (W - 2 * pad), y = o => T + (hi - o) / (hi - lo) * (H - T - B);
     const step = k => K.pts.map((p, i) => `${i ? "L" : "M"}${x(p[0]).toFixed(1)} ${y(p[k]).toFixed(1)}H${x(p[1]).toFixed(1)}`).join("");
@@ -410,7 +410,7 @@ h1, h2, h3 { text-wrap: balance; }
     s += `<path d="${step(2)}" fill="none" stroke="#fff" stroke-width="${full ? 2.5 : 2}"/>`;
     const a = x(K.ikkuna[0]), b = x(K.ikkuna[1]), by = T - (full ? 26 : 16), lg = full ? 12 : 8;
     s += `<path d="M${a} ${by + lg}V${by}H${b}V${by + lg}" fill="none" stroke="#ff5a3c" stroke-width="${full ? 3 : 2.5}"/>`;
-    s += `<text x="${(a + b) / 2}" y="${by - 8}" text-anchor="middle" font-size="${full ? (W < 600 ? 14 : 16) : 12}" font-weight="600" fill="#ff5a3c" ${F}>${full ? "Open at least 5 h 34 min, 7,7 % edge" : "≥ 5 h 34 min"}</text>`;
+    s += `<text x="${(a + b) / 2}" y="${by - 8}" text-anchor="middle" font-size="${full ? (W < 600 ? 14 : 16) : 13}" font-weight="600" fill="#ff5a3c" ${F}>${full ? "Open at least 5 h 34 min, 7,7 % edge" : "≥ 5 h 34 min"}</text>`;
     svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.setAttribute("height", H); svg.innerHTML = s;
   }
   const kv = document.getElementById("kv"), mini = document.getElementById("kv-mini");
