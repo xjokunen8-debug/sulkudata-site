@@ -283,15 +283,15 @@ h1, h2, h3 { text-wrap: balance; }
           <thead><tr><th>Match</th><th>Selection</th><th class="n">Yours</th><th class="n">Fair</th><th class="n">Veikkaus</th><th>Status</th><th class="n">At risk</th></tr></thead>
           <tbody>
             <tr class="open"><td><span class="m">Brighton – Wolves</span><span class="l">Premier League, 19:00</span></td><td>Brighton</td><td class="n hi">1.83</td><td class="n">1.74</td><td class="n">1.76</td><td class="st">Open for 52 min</td><td class="n r">860 €</td></tr>
-            <tr class="open"><td><span class="m">Kärpät – KalPa</span><span class="l">Liiga, 18:30</span></td><td>KalPa</td><td class="n hi">3.45</td><td class="n">3.20</td><td class="n">3.30</td><td class="st">Open for 23 min</td><td class="n r">310 €</td></tr>
+            <tr class="open"><td><span class="m">Rangers – Devils</span><span class="l">NHL, 02:00</span></td><td>Devils</td><td class="n hi">3.45</td><td class="n">3.20</td><td class="n">3.30</td><td class="st">Open for 23 min</td><td class="n r">310 €</td></tr>
             <tr class="open"><td><span class="m">HJK – Ilves</span><span class="l">Veikkausliiga, 19:00</span></td><td>Draw</td><td class="n hi">3.90</td><td class="n">3.66</td><td class="n">3.60</td><td class="st">Open, fair price paused</td><td class="n r">190 €</td></tr>
-            <tr><td><span class="m">Lukko – HIFK</span><span class="l">Liiga, 18:30</span></td><td>HIFK</td><td class="n">3.70</td><td class="n">3.68</td><td class="n">3.75</td><td class="st">Fixed by Mikko, 17:05</td><td class="n">140 €</td></tr>
-            <tr><td><span class="m">TPS – Ilves</span><span class="l">Liiga, 18:30</span></td><td>TPS</td><td class="n">2.38</td><td class="n">2.41</td><td class="n">2.35</td><td class="st">Watching</td><td class="n">–</td></tr>
+            <tr><td><span class="m">Bruins – Maple Leafs</span><span class="l">NHL, 02:30</span></td><td>Maple Leafs</td><td class="n">3.70</td><td class="n">3.68</td><td class="n">3.75</td><td class="st">Fixed by Mikko, 17:05</td><td class="n">140 €</td></tr>
+            <tr><td><span class="m">Dortmund – Leipzig</span><span class="l">Bundesliga, 21:30</span></td><td>Dortmund</td><td class="n">2.38</td><td class="n">2.41</td><td class="n">2.35</td><td class="st">Watching</td><td class="n">–</td></tr>
           </tbody>
         </table>
       </div>
     </div>
-    <p class="small ui-cap">Example screen. Matches are real fixtures; prices and figures are illustrative.</p>
+    <p class="small ui-cap">Example screen. Matches, prices and figures are illustrative.</p>
     <div class="trio">
       <div><h3>Alerts in plain words</h3><p>A time, the match, one sentence, the money. To your trading channel and to whoever is on shift.</p></div>
       <div><h3>Who fixed it, and when</h3><p>When someone moves the price, the row says who and how long after the alert. The Monday report counts it.</p></div>
@@ -333,9 +333,10 @@ h1, h2, h3 { text-wrap: balance; }
     <div class="qa">
       <details open><summary>Which fair price do you use?</summary><div class="a"><p>Pinnacle's, with its margin removed by the power method. A simple proportional split overstates the chance of outsiders; the power method doesn't, so long odds don't inflate the numbers.</p><p>Alerts use the price at that moment. The Monday report also checks every window against the closing price, the best estimate of the true chance there is.</p></div></details>
       <details><summary>Isn't most overpricing just news we couldn't have known?</summary><div class="a"><p>Most of it, yes. Line-ups, injuries and goalies move the market after your price is set. In our sample about three windows in ten were visible at the time. Those are the ones we bill, because they are the ones a value bettor uses and the ones your desk can close.</p></div></details>
-      <details><summary>Do you need access to our systems?</summary><div class="a"><p>No. We read the prices your Finnish customers see. If you share stake data, the report turns estimated value into exact figures, but it isn't needed to start.</p></div></details>
-      <details><summary>What counts as a window?</summary><div class="a"><p>Your price at least 2 % above the fair price at that moment, and still at least 2 % above the fair price at kick-off. You can set your own threshold. Edges above 30 % are treated as likely feed errors and shown separately.</p></div></details>
-      <details><summary>Which competitions?</summary><div class="a"><p>Every match-winner and 1X2 market the sharp market prices, football, ice hockey, basketball, tennis, American football and more, Veikkausliiga included. Liiga and Mestis are priced 1X2 by most Finnish sites and only two-way by Pinnacle; matching the two is the next thing we are adding.</p></div></details>
+      <details><summary>Do you need access to our systems?</summary><div class="a"><p>No. We read the prices your Finnish customers see. If you share stake data, the report turns estimated value into exact figures, but it isn't needed to start. If you would rather run Sulku inside your own platform on your own feeds, that works too.</p></div></details>
+      <details><summary>What counts as a window?</summary><div class="a"><p>A price that stays above the sharp market's fair price after the market has moved, for long enough that a bettor can take it. Thresholds are set per sport and price band, and tuned with your desk.</p></div></details>
+      <details><summary>Which competitions?</summary><div class="a"><p>Match-winner and 1X2 markets the sharp market prices: football, ice hockey, basketball, tennis, American football and more, Veikkausliiga included.</p></div></details>
+      <details><summary>Does it work outside Finland?</summary><div class="a"><p>Yes. The same detection runs in any market with a sharp reference price, so adding a market or a brand is configuration, not a new project. Finland is where we started.</p></div></details>
       <details><summary>Will you show our numbers to anyone else?</summary><div class="a"><p>No. Each report is for one operator about its own prices. Public figures on this page are ranges across six sites, with no site named.</p></div></details>
     </div>
   </div>
@@ -363,7 +364,7 @@ h1, h2, h3 { text-wrap: balance; }
   <div class="wrap">
     <div>
       <h2>Start with a report on your own prices.</h2>
-      <p>Tell us which brand and which market you run today. We send back what your slow prices gave away there last month, the same way the Monday report does.</p>
+      <p>Tell us which brand and which market you run today. We send back what your slow prices gave away, the same way the Monday report does.</p>
     </div>
     <div class="mail">
       <span class="note">Write to</span>
