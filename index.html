@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Sulku: price-error alarm for Finnish sportsbooks</title>
-<meta name="description" content="Sulku measures every price on your Finnish site against the sharp market, alerts your traders the moment one is wrong, and sends the bill every Monday. Built in Tampere for 1 July 2027.">
+<title>Sulku: price-error alarm for sportsbooks</title>
+<meta name="description" content="Sulku is built to measure your prices against the sharp market's fair price, alerts your traders while a window is open, and puts a figure on what each one cost. Built around your markets, your brands and your desk.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://sulkudata.com/">
 <meta property="og:title" content="Sulku: every price you leave up too long has a cost">
-<meta property="og:description" content="1 021 times in 19 days, a Finnish sportsbook price sat above what Pinnacle itself was offering. Sulku finds those windows while they are open.">
+<meta property="og:description" content="1 020 times in 19 days, six sportsbooks left a price above what Pinnacle itself was offering. Sulku is built to find those windows while they are open.">
 <meta property="og:image" content="https://sulkudata.com/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#173a5e">
@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
 <style>
-/* sulkudata.com per DESIGN.md. Structure differs from the customer prototypes: full-bleed opening line,
-   fact rows, a timeline of one real window, the product screen, a question list. Light-only, colours explicit. */
+/* sulkudata.com per DESIGN.md. v2 (28.10.2026): multi-market positioning, data figures from the Finnish sample
+   (analysis/tulokset/18_ikkunat.csv, 18_asiakkaat.json), two ways to run it, what it extends to. Light-only. */
 :root {
   --paper: #ffffff; --tint: #f4f5f3; --line: #e2e5e1; --line-2: #c9cec8;
   --ink: #111316; --ink-2: #41474e; --grey: #737b75;
@@ -27,13 +27,12 @@
   --lake: #173a5e; --lake-line: #2d4e70; --lake-grey: #a3b6ca; --lake-red: #ff5a3c;
   --night: #0f1113; --night-2: #17191c; --night-line: #2a2e33; --night-ink: #e9ebe7; --night-grey: #8f978f; --night-red: #ff5a3c;
   --f: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
-  --gut: max(24px, env(safe-area-inset-left, 0px));
   color-scheme: light;
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--f); font-size: 16px; line-height: 1.6; font-feature-settings: "kern", "liga"; -webkit-font-smoothing: antialiased; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--f); font-size: 17px; line-height: 1.6; font-feature-settings: "kern", "liga"; -webkit-font-smoothing: antialiased; }
 img { max-width: 100%; }
 .wrap { max-width: 1120px; margin: 0 auto; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); }
 @media (max-width: 480px) { .wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); } }
@@ -49,14 +48,14 @@ h1, h2, h3 { text-wrap: balance; }
 .wm path { fill: currentColor; }
 .wm.alarm path { fill: var(--night-red); }
 
-.btn { display: inline-block; font: 600 15px/1 var(--f); border-radius: 4px; padding: 13px 18px; border: 1px solid transparent; cursor: pointer; text-decoration: none; }
+.btn { display: inline-block; font: 600 15px/1 var(--f); border-radius: 4px; padding: 14px 20px; border: 1px solid transparent; cursor: pointer; text-decoration: none; }
 .btn-ink { background: var(--ink); color: #fff; } .btn-ink:hover { background: #2a2e33; }
 .btn-line { background: transparent; color: var(--ink); border-color: var(--line-2); } .btn-line:hover { border-color: var(--ink); }
 .on-lake .btn-ink { background: #fff; color: var(--lake); } .on-lake .btn-ink:hover { background: #e4ebf2; }
 .on-lake .btn-line { color: #fff; border-color: #5f7d9c; } .on-lake .btn-line:hover { border-color: #fff; }
 .on-lake :focus-visible { outline-color: #fff; }
 
-/* opening: headline, then the line runs edge to edge */
+/* opening: product-first B2B hero on Lake */
 .hero { background: var(--lake); color: #fff; overflow: hidden; }
 .mast { border-bottom: 1px solid var(--lake-line); }
 .mast .wrap { display: flex; align-items: center; gap: 32px; padding-block: 20px; flex-wrap: wrap; }
@@ -64,58 +63,105 @@ h1, h2, h3 { text-wrap: balance; }
 .mast nav { display: flex; gap: 26px; font-size: 15px; flex-wrap: wrap; margin-left: auto; }
 .mast nav a { color: var(--lake-grey); text-decoration: none; } .mast nav a:hover { color: #fff; }
 .mast .btn { padding: 10px 14px; font-size: 14px; }
-@media (max-width: 860px) { .mast nav { display: none; } .mast .btn { margin-left: auto; } }
-.hero-in { padding-block: 96px 24px; }
-.hero h1 { margin: 0; font-weight: 700; font-size: clamp(40px, 6.4vw, 76px); line-height: 1.0; letter-spacing: -.038em; max-width: 17ch; }
-.hero h1 em { font-style: normal; color: var(--lake-red); }
-.hero-sub { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 48px; margin-top: 40px; align-items: end; }
-.hero-sub p { margin: 0; font-size: clamp(18px, 1.8vw, 21px); line-height: 1.45; color: #dfe7ef; max-width: 46ch; }
-.hero-sub .acts { display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
-@media (max-width: 860px) { .hero-in { padding-block: 56px 16px; } .hero-sub { grid-template-columns: 1fr; gap: 24px; margin-top: 28px; } .hero-sub .acts { justify-content: flex-start; } }
-.bleed { margin-top: 24px; }
-.bleed svg { display: block; width: 100%; }
-.bleed p { margin: 0; padding-block: 12px 40px; font-size: 14px; color: var(--lake-grey); max-width: 80ch; }
+@media (max-width: 900px) { .mast nav { display: none; } .mast .btn { margin-left: auto; } }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 56px; align-items: center; padding-block: 88px 64px; }
+.hero h1 { margin: 0; font-weight: 700; font-size: clamp(40px, 5vw, 64px); line-height: 1.02; letter-spacing: -.036em; max-width: 13ch; }
+.hero-copy p { margin: 24px 0 0; font-size: clamp(18px, 1.6vw, 20px); line-height: 1.5; color: #dfe7ef; max-width: 40ch; }
+.hero-copy .acts { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
+.shot { background: var(--night); color: var(--night-ink); border-radius: 6px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,.18), 0 32px 64px -24px rgba(0,0,0,.55); min-width: 0; }
+.shot-top { display: flex; align-items: center; gap: 22px; padding: 12px 18px; border-bottom: 1px solid var(--night-line); font-size: 13px; color: var(--night-grey); }
+.shot-top .wm { font-size: 19px; color: var(--night-ink); margin-right: 8px; }
+.shot-top b { color: var(--night-ink); font-weight: 600; }
+.shot-top .ctx { margin-left: auto; }
+.shot-head { padding: 18px 18px 4px; }
+.shot-head h4 { margin: 0; font-weight: 600; font-size: 19px; letter-spacing: -.015em; line-height: 1.3; }
+.shot-head span { display: block; margin-top: 4px; font-size: 13px; color: var(--night-grey); }
+.shot svg { display: block; width: 100%; }
+.shot-rows { border-top: 1px solid var(--night-line); font-size: 13px; }
+.shot-rows div { display: grid; grid-template-columns: 6.5em minmax(0, 1fr) auto; gap: 12px; padding: 10px 18px; border-bottom: 1px solid var(--night-line); }
+.shot-rows div:last-child { border-bottom: 0; }
+.shot-rows time { color: var(--night-grey); font-variant-numeric: tabular-nums; }
+.shot-rows .n { font-variant-numeric: tabular-nums; text-align: right; }
+.shot-rows .r { color: var(--night-red); }
+.shot-cap { margin: 12px 0 0; font-size: 13px; color: var(--lake-grey); }
+.proof { border-top: 1px solid var(--lake-line); }
+.proof .wrap { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; padding-block: 36px 40px; }
+.proof b { display: block; font-weight: 700; font-size: clamp(34px, 3.6vw, 46px); letter-spacing: -.035em; line-height: 1; font-variant-numeric: proportional-nums lining-nums; }
+.proof span { display: block; margin-top: 10px; color: #dfe7ef; font-size: 16px; max-width: 30ch; }
+.proof p { grid-column: 1 / -1; margin: 0; font-size: 13px; color: var(--lake-grey); }
+@media (max-width: 960px) { .hero-grid { grid-template-columns: 1fr; gap: 40px; padding-block: 56px 48px; } .hero h1 { max-width: 16ch; } }
+@media (max-width: 700px) { .proof .wrap { grid-template-columns: 1fr; gap: 24px; } }
 
 /* sections */
 .sec { border-top: 1px solid var(--line); }
 .sec.plain { border-top: 0; }
-.sec > .wrap { padding-block: 96px; }
+.sec.tint { background: var(--tint); border-top: 0; }
+.sec > .wrap { padding-block: 104px; }
 .kicker { margin: 0 0 14px; font-size: 15px; font-weight: 600; color: var(--lake); }
-.sec h2 { margin: 0; font-weight: 700; font-size: clamp(32px, 4vw, 48px); line-height: 1.04; letter-spacing: -.032em; max-width: 20ch; }
-.sec .intro { margin: 18px 0 0; font-size: clamp(18px, 1.8vw, 20px); line-height: 1.5; color: var(--ink-2); max-width: 60ch; }
-@media (max-width: 860px) { .sec > .wrap { padding-block: 64px; } }
+.sec h2 { margin: 0; font-weight: 700; font-size: clamp(34px, 4.4vw, 54px); line-height: 1.02; letter-spacing: -.034em; max-width: 19ch; }
+.sec .intro { margin: 20px 0 0; font-size: clamp(18px, 1.9vw, 21px); line-height: 1.5; color: var(--ink-2); max-width: 58ch; }
+.split { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: 64px; align-items: end; }
+.split .intro { margin: 0; }
+@media (max-width: 860px) { .sec > .wrap { padding-block: 64px; } .split { grid-template-columns: 1fr; gap: 20px; } }
 
 /* fact rows */
-.facts { margin-top: 48px; border-top: 2px solid var(--ink); }
-.fact { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: 48px; padding-block: 26px; border-bottom: 1px solid var(--line); align-items: baseline; }
-.fact b { font-weight: 700; font-size: clamp(40px, 5.4vw, 64px); letter-spacing: -.035em; line-height: 1; font-variant-numeric: proportional-nums lining-nums; }
-.fact p { margin: 0; font-size: 18px; line-height: 1.5; color: var(--ink-2); max-width: 48ch; }
+.facts { margin-top: 56px; border-top: 2px solid var(--ink); }
+.fact { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: 64px; padding-block: 28px; border-bottom: 1px solid var(--line); align-items: baseline; }
+.fact b { font-weight: 700; font-size: clamp(44px, 5.8vw, 72px); letter-spacing: -.04em; line-height: 1; font-variant-numeric: proportional-nums lining-nums; }
+.fact p { margin: 0; font-size: 19px; line-height: 1.5; color: var(--ink-2); max-width: 46ch; }
 .fact p strong { color: var(--ink); font-weight: 600; }
 .facts-note { margin: 16px 0 0; font-size: 14px; color: var(--grey); max-width: 90ch; }
 @media (max-width: 760px) { .fact { grid-template-columns: 1fr; gap: 10px; padding-block: 22px; } }
 
-/* timeline of one window */
-.anat { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: 64px; align-items: start; }
-.anat-head { position: sticky; top: 32px; }
-.anat-head .sum { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line-2); }
-.anat-head .sum b { display: block; font-weight: 700; font-size: 40px; letter-spacing: -.03em; line-height: 1; color: var(--red); }
-.anat-head .sum span { display: block; margin-top: 8px; color: var(--ink-2); font-size: 15px; }
-.tl { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--line-2); }
-.tl li { position: relative; padding: 0 0 36px 32px; }
-.tl li:last-child { padding-bottom: 0; }
-.tl li::before { content: ""; position: absolute; left: -2px; top: 11px; width: 18px; height: 2px; background: var(--ink); }
-.tl li.hot::before { background: var(--red); width: 24px; }
+/* figures */
+.figs { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 20px; margin-top: 64px; }
+.fig-p { background: var(--tint); padding: 32px 32px 24px; min-width: 0; }
+.fig-p h3 { margin: 0; font-weight: 600; font-size: 21px; letter-spacing: -.015em; line-height: 1.25; max-width: 30ch; }
+.fig-p .sub { margin: 6px 0 0; color: var(--ink-2); font-size: 16px; max-width: 46ch; }
+.fig-p svg { display: block; width: 100%; margin-top: 24px; }
+.fig-p .src { margin: 14px 0 0; font-size: 13px; color: var(--grey); }
+.key { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 16px; font-size: 14px; color: var(--ink-2); }
+.key span { display: inline-flex; align-items: center; gap: 8px; }
+.key i { width: 12px; height: 12px; display: inline-block; }
+@media (max-width: 960px) { .figs { grid-template-columns: 1fr; } .fig-p { padding: 24px 20px 20px; } }
+
+/* who it is for */
+.roles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; margin-top: 48px; }
+.roles div { border-top: 2px solid var(--ink); padding-top: 18px; min-width: 0; }
+.roles h3 { margin: 0 0 8px; font-weight: 700; font-size: 22px; letter-spacing: -.02em; }
+.roles p { margin: 0; color: var(--ink-2); font-size: 16px; }
+@media (max-width: 760px) { .roles { grid-template-columns: 1fr; gap: 24px; } }
+
+/* how it works: four steps on one rule */
+.flow { list-style: none; margin: 56px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 2px solid var(--ink); }
+.flow li { padding: 26px 28px 0 0; position: relative; }
+.flow li + li { padding-left: 28px; border-left: 1px solid var(--line); }
+.flow h3 { margin: 0 0 8px; font-weight: 600; font-size: 21px; letter-spacing: -.015em; line-height: 1.25; }
+.flow p { margin: 0; color: var(--ink-2); font-size: 16px; }
+.flow .eg { display: block; margin-top: 14px; font-size: 14px; color: var(--grey); font-variant-numeric: tabular-nums; }
+.flow .eg b { color: var(--ink); font-weight: 600; } .flow .eg b.r { color: var(--red); }
+@media (max-width: 900px) { .flow { grid-template-columns: 1fr 1fr; } .flow li:nth-child(3) { padding-left: 0; border-left: 0; } .flow li { padding-bottom: 28px; } }
+@media (max-width: 560px) { .flow { grid-template-columns: 1fr; } .flow li, .flow li + li { padding: 22px 0 22px; border-left: 0; border-bottom: 1px solid var(--line); } }
+
+/* anatomy: chart above the timeline */
+.anat-fig { margin-top: 48px; background: var(--tint); padding: 28px 28px 18px; }
+.anat-fig svg { display: block; width: 100%; }
+.anat-fig .src { margin: 10px 0 0; font-size: 13px; color: var(--grey); }
+.tl { list-style: none; margin: 40px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 32px; }
+.tl li { border-top: 2px solid var(--ink); padding-top: 16px; min-width: 0; }
+.tl li.hot { border-top-color: var(--red); }
 .tl time { display: block; font-weight: 600; font-size: 15px; color: var(--grey); font-variant-numeric: tabular-nums; }
-.tl h3 { margin: 4px 0 6px; font-weight: 600; font-size: 21px; letter-spacing: -.015em; line-height: 1.25; }
-.tl p { margin: 0; color: var(--ink-2); max-width: 54ch; }
-.tl .px { display: inline-flex; gap: 18px; margin-top: 10px; font-size: 14px; color: var(--grey); flex-wrap: wrap; }
-.tl .px span b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
-.tl .px span b.r { color: var(--red); }
-@media (max-width: 860px) { .anat { grid-template-columns: 1fr; gap: 36px; } .anat-head { position: static; } }
+.tl h3 { margin: 4px 0 6px; font-weight: 600; font-size: 19px; letter-spacing: -.015em; line-height: 1.25; }
+.tl p { margin: 0; color: var(--ink-2); font-size: 16px; }
+.tl .px { display: flex; gap: 14px; margin-top: 10px; font-size: 14px; color: var(--grey); flex-wrap: wrap; }
+.tl .px b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.tl .px b.r { color: var(--red); }
+@media (max-width: 900px) { .tl { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .tl { grid-template-columns: 1fr; gap: 24px; } .anat-fig { padding: 20px 14px 14px; } }
 
 /* product */
 .prod-head { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 48px; align-items: end; margin-bottom: 40px; }
-.prod-head p { margin: 0; color: var(--ink-2); font-size: 17px; max-width: 52ch; }
+.prod-head p { margin: 0; color: var(--ink-2); font-size: 18px; max-width: 50ch; }
 @media (max-width: 860px) { .prod-head { grid-template-columns: 1fr; gap: 16px; } }
 .ui { background: var(--night); color: var(--night-ink); border-radius: 6px; overflow: hidden; box-shadow: 0 1px 2px rgba(17,19,22,.1), 0 24px 48px -24px rgba(17,19,22,.35); }
 .ui-top { display: flex; align-items: center; gap: 28px; padding: 14px 22px; border-bottom: 1px solid var(--night-line); font-size: 14px; flex-wrap: wrap; }
@@ -130,7 +176,7 @@ h1, h2, h3 { text-wrap: balance; }
 .ui-sum .fig b.r { color: var(--night-red); }
 .ui-sum .fig span { font-size: 13px; color: var(--night-grey); }
 .ui-tbl { overflow-x: auto; }
-.ui-tbl table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 14px; }
+.ui-tbl table { border-collapse: collapse; width: 100%; min-width: 820px; font-size: 14px; }
 .ui-tbl th { text-align: left; font-weight: 500; font-size: 13px; color: var(--night-grey); padding: 12px 14px; border-bottom: 1px solid var(--night-line); white-space: nowrap; }
 .ui-tbl td { padding: 13px 14px; border-bottom: 1px solid var(--night-line); white-space: nowrap; }
 .ui-tbl tr:last-child td { border-bottom: 0; }
@@ -140,11 +186,19 @@ h1, h2, h3 { text-wrap: balance; }
 .ui-tbl .st { color: var(--night-grey); } .ui-tbl tr.open .st { color: var(--night-red); }
 .ui-tbl td.n.r { color: var(--night-red); } .ui-tbl .hi { color: var(--night-ink); font-weight: 600; }
 .ui-cap { margin: 12px 0 0; }
-.trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 48px; margin-top: 48px; }
-.trio div { min-width: 0; }
+.below { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 40px; margin-top: 56px; align-items: start; }
+.alert { background: var(--night-2); color: var(--night-ink); border-radius: 6px; padding: 20px 22px; font-size: 15px; line-height: 1.5; box-shadow: inset 2px 0 0 var(--night-red); }
+.alert .who { display: flex; justify-content: space-between; gap: 12px; color: var(--night-grey); font-size: 13px; margin-bottom: 8px; }
+.alert .who .wm { font-size: 16px; color: var(--night-ink); }
+.alert p { margin: 0; }
+.alert p + p { margin-top: 8px; color: var(--night-grey); font-size: 14px; }
+.alert b { font-weight: 600; } .alert b.r { color: var(--night-red); }
+.trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+.trio div { min-width: 0; border-top: 1px solid var(--line-2); padding-top: 16px; }
 .trio h3 { margin: 0 0 6px; font-weight: 600; font-size: 18px; letter-spacing: -.01em; }
-.trio p { margin: 0; color: var(--ink-2); }
-@media (max-width: 860px) { .trio { grid-template-columns: 1fr; gap: 24px; } }
+.trio p { margin: 0; color: var(--ink-2); font-size: 16px; }
+@media (max-width: 960px) { .below { grid-template-columns: 1fr; } }
+@media (max-width: 700px) { .trio { grid-template-columns: 1fr; gap: 20px; } }
 
 /* report */
 .rep { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 64px; align-items: center; }
@@ -162,7 +216,32 @@ h1, h2, h3 { text-wrap: balance; }
 .rep-list li { padding-block: 18px; border-bottom: 1px solid var(--line); }
 .rep-list h3 { margin: 0 0 4px; font-weight: 600; font-size: 18px; letter-spacing: -.01em; }
 .rep-list p { margin: 0; color: var(--ink-2); max-width: 54ch; }
-@media (max-width: 860px) { .rep { grid-template-columns: 1fr; gap: 36px; } }
+@media (max-width: 860px) { .rep { grid-template-columns: 1fr; gap: 36px; } .a4 { padding: 24px; } }
+
+/* two ways to run it */
+.ways { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 56px; }
+.way { background: #fff; padding: 36px 36px 32px; min-width: 0; }
+.way h3 { margin: 0; font-weight: 700; font-size: clamp(24px, 2.6vw, 30px); letter-spacing: -.025em; line-height: 1.1; }
+.way .lead { margin: 12px 0 0; font-size: 18px; color: var(--ink-2); max-width: 40ch; }
+.way dl { margin: 28px 0 0; border-top: 1px solid var(--line-2); }
+.way dl div { display: grid; grid-template-columns: 9em minmax(0, 1fr); gap: 16px; padding-block: 14px; border-bottom: 1px solid var(--line); }
+.way dt { font-weight: 600; font-size: 15px; }
+.way dd { margin: 0; color: var(--ink-2); font-size: 15px; }
+@media (max-width: 860px) { .ways { grid-template-columns: 1fr; } .way { padding: 26px 20px 22px; } .way dl div { grid-template-columns: 1fr; gap: 2px; } }
+
+/* what it extends to */
+.ext { list-style: none; margin: 56px 0 0; padding: 0; border-top: 2px solid var(--ink); }
+.ext li { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: 64px; padding-block: 26px; border-bottom: 1px solid var(--line); }
+.ext h3 { margin: 0; font-weight: 600; font-size: 22px; letter-spacing: -.018em; line-height: 1.25; }
+.ext p { margin: 0; color: var(--ink-2); font-size: 18px; max-width: 52ch; }
+@media (max-width: 760px) { .ext li { grid-template-columns: 1fr; gap: 8px; padding-block: 20px; } }
+
+/* markets */
+.mk { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; margin-top: 56px; }
+.mk div { border-top: 2px solid var(--ink); padding-top: 18px; min-width: 0; }
+.mk h3 { margin: 0 0 6px; font-weight: 700; font-size: 26px; letter-spacing: -.025em; }
+.mk p { margin: 0; color: var(--ink-2); font-size: 16px; }
+@media (max-width: 760px) { .mk { grid-template-columns: 1fr; gap: 24px; } }
 
 /* questions */
 .qa { margin-top: 40px; border-top: 2px solid var(--ink); }
@@ -175,19 +254,11 @@ h1, h2, h3 { text-wrap: balance; }
 .qa .a { padding: 0 48px 26px 0; display: grid; gap: 12px; max-width: 68ch; }
 .qa .a p { margin: 0; color: var(--ink-2); font-size: 17px; }
 
-/* finland */
-.fi-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 64px; align-items: start; }
-.fi-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line-2); }
-.fi-list li { padding-block: 20px; border-bottom: 1px solid var(--line); }
-.fi-list h3 { margin: 0 0 4px; font-weight: 600; font-size: 18px; letter-spacing: -.01em; }
-.fi-list p { margin: 0; color: var(--ink-2); }
-@media (max-width: 860px) { .fi-grid { grid-template-columns: 1fr; gap: 32px; } }
-
 /* closing */
 .close { background: var(--lake); color: #fff; }
-.close .wrap { padding-block: 96px 80px; display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 48px; align-items: end; }
-.close h2 { margin: 0; font-weight: 700; font-size: clamp(34px, 4.6vw, 56px); line-height: 1.02; letter-spacing: -.035em; max-width: 15ch; }
-.close p { margin: 18px 0 0; color: #dfe7ef; font-size: 18px; line-height: 1.5; max-width: 46ch; }
+.close .wrap { padding-block: 104px 80px; display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 48px; align-items: end; }
+.close h2 { margin: 0; font-weight: 700; font-size: clamp(36px, 4.8vw, 60px); line-height: 1.0; letter-spacing: -.036em; max-width: 15ch; }
+.close p { margin: 18px 0 0; color: #dfe7ef; font-size: 19px; line-height: 1.5; max-width: 46ch; }
 .mail { display: grid; gap: 10px; }
 .mail .addr { font-weight: 600; font-size: clamp(24px, 2.8vw, 32px); letter-spacing: -.02em; overflow-wrap: anywhere; color: #fff; text-decoration: none; }
 .mail .addr:hover { text-decoration: underline; text-underline-offset: 4px; }
@@ -205,55 +276,111 @@ h1, h2, h3 { text-wrap: balance; }
   <div class="mast">
     <div class="wrap">
       <a class="wm" href="#top" aria-label="Sulku, home">sulku<svg viewBox="0 0 38 100" aria-hidden="true"><path d="M0 0H38V100H0V89H27V11H0Z"/></svg></a>
-      <nav aria-label="Main"><a href="#facts">Findings</a><a href="#window">How it works</a><a href="#product">Product</a><a href="#report">Report</a><a href="#questions">Questions</a><a href="#finland">Finland</a></nav>
+      <nav aria-label="Main"><a href="#how">How it works</a><a href="#product">Product</a><a href="#facts">Findings</a><a href="#ways">Deployment</a><a href="#questions">Questions</a></nav>
       <a class="btn btn-ink" href="#contact">Request a report</a>
     </div>
   </div>
-  <div class="wrap hero-in" id="top">
-    <h1><em>1 021 times</em> in 19 days, a Finnish sportsbook price sat above what Pinnacle itself was offering.</h1>
-    <div class="hero-sub">
-      <p>Sulku watches every price on your Finnish site against the sharp market, tells your traders the moment one is wrong, and sends you the bill every Monday.</p>
-      <div class="acts"><a class="btn btn-ink" href="#contact">Request a leakage report</a><a class="btn btn-line" href="#questions">How we count</a></div>
+  <div class="wrap hero-grid" id="top">
+    <div class="hero-copy">
+      <h1>The price&#8209;error alarm for sportsbooks</h1>
+      <p>Sulku is built to compare your prices with the sharp market's fair price, alert your traders while a window is open, and put a figure on what each one cost. Built around your markets, your brands and your desk.</p>
+      <div class="acts"><a class="btn btn-ink" href="#contact">Request a leakage report</a><a class="btn btn-line" href="#how">How it works</a></div>
+    </div>
+    <div>
+      <div class="shot" role="img" aria-label="Sulku screen with one real window: New York Rangers at 3.15 on one site while the fair price was 2.98, open for 72 minutes, 6.9 percent edge against the closing price.">
+        <div class="shot-top"><span class="wm alarm">sulku<svg viewBox="0 0 38 100" aria-hidden="true"><path d="M0 0H38V100H0V89H27V11H0Z"/></svg></span><b>Windows</b><span>Reports</span><span class="ctx">Fri 9 October</span></div>
+        <div class="shot-head"><h4>New York Rangers at 3.15 is above fair.</h4><span>Capitals – Rangers, NHL, puck drop 02:15</span></div>
+        <svg id="kv"></svg>
+        <div class="shot-rows">
+          <div><time>Fri 20:46</time><span>Sharp market moves, fair price 2.98</span><span class="n r">3.15</span></div>
+          <div><time>Fri 21:58</time><span>Price moved to 3.00, 72 min later</span><span class="n">3.00</span></div>
+          <div><time>Sat 02:15</time><span>Edge given, against the closing price</span><span class="n r">6,9 %</span></div>
+        </div>
+      </div>
+      <p class="shot-cap">A real window from our sample, on one Finnish-facing site, 9–10 October 2026, Finnish time. Its price solid, the fair price dashed.</p>
     </div>
   </div>
-  <div class="bleed">
-    <svg id="kv" role="img" aria-label="On one Finnish site, Calgary Flames stayed at 4.25 from 21:12 while the fair price moved between 4.00 and 4.12; the window stayed open at least 5 hours 34 minutes with a 7.7 percent edge."></svg>
-    <div class="wrap"><p>Calgary Flames – Carolina Hurricanes, NHL, 18–19 October, on one Finnish site. Its price in white, the sharp market's fair price dashed.</p></div>
+  <div class="proof">
+    <div class="wrap">
+      <div><b>1 020</b><span>windows a price watch would have seen while they were open, in 19 days</span></div>
+      <div><b>6–12 %</b><span>of the last 24 hours before kick-off, a site's price was at least 2 % above fair</span></div>
+      <div><b>5,8–7,3 %</b><span>average edge given away in those windows, against the fair price at kick-off</span></div>
+      <p>Six sportsbooks' Finnish-facing match-winner and 1X2 prices, 30 September – 19 October 2026, against Pinnacle with its margin removed. Ranges show the lowest and highest site.</p>
+    </div>
   </div>
 </header>
 
 <main>
-<section class="sec plain" id="facts">
+<section class="sec plain" id="who">
   <div class="wrap">
-    <p class="kicker">Nineteen days on six Finnish sites</p>
-    <h2>The gaps are not rare, and they are not hidden.</h2>
-    <p class="intro">We followed the match-winner and 1X2 prices six sportsbooks show Finnish customers, from 30 September to 19 October 2026, against the sharpest market there is.</p>
-    <div class="facts">
-      <div class="fact"><b>6–12 %</b><p>of the last 24 hours before kick-off, a site's price was <strong>at least 2 % above fair</strong>. All six sites, without exception.</p></div>
-      <div class="fact"><b>1 021</b><p>windows that <strong>a price watch would have seen while they were open</strong>, on 676 different selections. In each one, the site paid more than Pinnacle was offering.</p></div>
-      <div class="fact"><b>5,8–7,3 %</b><p>average edge given to whoever bet into those windows, <strong>measured against the fair price at kick-off</strong>.</p></div>
-      <div class="fact"><b>62 %</b><p>of prices differed between <strong>two Finnish sites running the same pricing engine</strong>. Your Finnish price is your own, so it has to be measured on its own.</p></div>
+    <div class="split">
+      <div>
+        <p class="kicker">Who it is for</p>
+        <h2>For the people who own the price</h2>
+      </div>
+      <p class="intro">Sportsbooks that set their own odds, or adjust a supplier's, and want to know where those prices are wrong before a value bettor does.</p>
     </div>
-    <p class="facts-note">About 1 100 matches per site. The fair price is Pinnacle's with its margin removed by the power method. Ranges show the lowest and highest site. Sites are not named here; each report is for one operator about its own prices.</p>
+    <div class="roles">
+      <div><h3>Head of trading</h3><p>One figure each week: what slow prices gave away, where it came from, and how much of it the desk closed.</p></div>
+      <div><h3>Traders on shift</h3><p>An alert in one sentence while the window is open, with the match, the price, the fair price and the money at stake.</p></div>
+      <div><h3>Risk</h3><p>With stake data, each window could be linked to the bets placed into it, so you would see which accounts find your slow prices first.</p></div>
+    </div>
   </div>
 </section>
 
-<section class="sec" id="window">
+<section class="sec" id="how">
   <div class="wrap">
-    <div class="anat">
-      <div class="anat-head">
-        <p class="kicker">Anatomy of a window</p>
-        <h2>Five and a half hours at 4.25</h2>
-        <p class="intro">One real window from the sample, on one Finnish site. Nobody needed inside information. The sharp market was public the whole time.</p>
-        <div class="sum"><b class="tn">≥ 5 h 34 min</b><span>open, with a 7,7 % edge against the fair price at the puck drop.</span></div>
+    <div class="split">
+      <div>
+        <p class="kicker">How it works</p>
+        <h2>Fair price first, then your price</h2>
       </div>
-      <ol class="tl">
-        <li class="hot"><time>Sun 21:12</time><h3>We first see the market. It is already wrong.</h3><p>The site has Calgary Flames at 4.25. The sharp market's fair price is 4.00. With Sulku, this is the moment the alert reaches the trader on shift.</p><div class="px"><span>Site <b class="r">4.25</b></span><span>Fair <b>4.00</b></span><span>Gap <b>6,2 %</b></span></div></li>
-        <li><time>Sun 23:54 – Mon 02:11</time><h3>The market drifts. The price does not.</h3><p>The fair price eases to 4.12 over the night. The site stays at 4.25 the whole time, still more than 3 % too generous.</p><div class="px"><span>Site <b class="r">4.25</b></span><span>Fair <b>4.04 → 4.12</b></span></div></li>
-        <li><time>Mon 02:47</time><h3>The site finally moves, briefly.</h3><p>Down to 4.20, then back to 4.25 and up to 4.30 in the last twenty minutes before the game.</p><div class="px"><span>Site <b class="r">4.20 → 4.30</b></span><span>Fair <b>4.12</b></span></div></li>
-        <li><time>Mon 03:10</time><h3>Puck drop. The bill.</h3><p>The fair price at close is 3.95. Every bet taken at 4.25 carried a 7,7 % edge against the book. A value bettor needed only a screen showing both prices.</p><div class="px"><span>Fair at close <b>3.95</b></span><span>Edge <b class="r">7,7 %</b></span></div></li>
-      </ol>
+      <p class="intro">Many odds tools compare you with other books. Sulku compares you with the fair price, so it still sees the window when the whole market is behind.</p>
     </div>
+    <ol class="flow">
+      <li><h3>The fair price</h3><p>The sharp market's price with its margin removed, kept current for every match-winner and 1X2 selection you offer.</p><span class="eg">Rangers, Fri 20:46: fair <b>2.98</b></span></li>
+      <li><h3>Your price against it</h3><p>Read from what your customers see, per brand and per market. In the sample, a gap of 2 % or more counts as a window.</p><span class="eg">Yours <b class="r">3.15</b>, gap <b>5,7 %</b></span></li>
+      <li><h3>The alert</h3><p>Would go to your trading channel in one sentence, with the match, the price, the fair price and the money at stake.</p><span class="eg">Open for <b>72 min</b></span></li>
+      <li><h3>The bill</h3><p>Every window checked against the closing price and counted each week: what it gave away, and what your desk closed.</p><span class="eg">Edge at close <b class="r">6,9 %</b></span></li>
+    </ol>
+
+    <div class="anat-fig">
+      <svg id="anat" role="img" aria-label="The Rangers window: the site's price stayed at 3.15 and 3.10 from Friday 20:46 to 21:58 while the fair price was 2.98 to 3.00, then moved to 3.00; the fair price at puck drop was 2.95."></svg>
+      <p class="src">The same window: Washington Capitals – New York Rangers, NHL, on one Finnish-facing site. Its price solid, the fair price dashed, the open window hatched. Finnish time.</p>
+    </div>
+    <ol class="tl">
+      <li class="hot"><time>Fri 20:46</time><h3>The market moves. The price does not.</h3><p>The sharp market shortens the Rangers: their fair price drops from 3.14 to 2.98. The site still has them at 3.15.</p><div class="px"><span>Site <b class="r">3.15</b></span><span>Fair <b>2.98</b></span></div></li>
+      <li><time>Fri 20:50</time><h3>A small move, not enough.</h3><p>The site trims to 3.10, still about 4 % above the fair price, and stays there for over an hour.</p><div class="px"><span>Site <b class="r">3.10</b></span><span>Fair <b>2.98 → 3.00</b></span></div></li>
+      <li><time>Fri 21:58</time><h3>Fixed, 72 minutes later.</h3><p>The price moves to 3.00, in line with the fair price. With an alert, the trader on shift would have seen it at 20:46.</p><div class="px"><span>Site <b>3.00</b></span><span>Fair <b>3.00</b></span></div></li>
+      <li><time>Sat 02:15</time><h3>Puck drop. The bill.</h3><p>The fair price at close is 2.95. Bets at 3.15 carried a 6,9 % edge against the book, bets at 3.10 a 5,2 % edge.</p><div class="px"><span>Edge <b class="r">6,9 %</b></span></div></li>
+    </ol>
+  </div>
+</section>
+
+<section class="sec" id="facts">
+  <div class="wrap">
+    <div class="split">
+      <div>
+        <p class="kicker">Nineteen days, six sportsbooks</p>
+        <h2>The gaps are not rare, and they are not hidden.</h2>
+      </div>
+      <p class="intro">We followed the match-winner and 1X2 prices six sportsbooks showed Finnish customers, from 30 September to 19 October 2026, against Pinnacle's prices with the margin removed. In each of the 1 020 windows, the site paid more than Pinnacle itself was offering.</p>
+    </div>
+    <div class="figs">
+      <div class="fig-p">
+        <h3>Half closed within 13 minutes. One in five stayed open for more than an hour.</h3>
+        <p class="sub">How long the 1 020 windows stayed open.</p>
+        <svg id="dur" role="img" aria-label="Window durations: 309 under 5 minutes, 249 from 5 to 15 minutes, 267 from 15 to 60 minutes, 95 from 1 to 3 hours, 100 over 3 hours."></svg>
+        <p class="src">8 % of windows were already open when we first saw the price, so their length is a lower bound.</p>
+      </div>
+      <div class="fig-p">
+        <h3>Three in ten opened between midnight and 08:00 Finnish time.</h3>
+        <p class="sub">When the windows opened, by hour and sport. Ice hockey is mostly the NHL overnight.</p>
+        <svg id="hrs" role="img" aria-label="Windows by hour of opening in Finnish time. Football peaks in the afternoon and evening, ice hockey between 20:00 and 03:00."></svg>
+        <div class="key"><span><i style="background:#173a5e"></i>Football</span><span><i style="background:#7d98b3"></i>Ice hockey</span><span><i style="background:#c9cec8"></i>Other sports</span></div>
+      </div>
+    </div>
+    <p class="facts-note">855–1 183 matches and 56–238 different selections with a window per site. The fair price is Pinnacle's with its margin removed by the power method. Sites are not named here; each report is for one operator about its own prices.</p>
   </div>
 </section>
 
@@ -264,13 +391,13 @@ h1, h2, h3 { text-wrap: balance; }
         <p class="kicker">The product</p>
         <h2>One table, open all shift</h2>
       </div>
-      <p>The screen opens with what matters now, in one sentence, and the three figures a head of trading asks for first. Below it, every price on your Finnish site that is above fair, how long it has been there and what it is costing.</p>
+      <p>The screen opens with what matters now, in one sentence, and the three figures a head of trading asks for first. Below it, every price that is above fair, on which brand, how long it has been there and what it is costing.</p>
     </div>
-    <div class="ui" role="img" aria-label="Example of the Sulku trading screen with three open windows">
+    <div class="ui" role="img" aria-label="Example of the Sulku trading screen with three open windows across two brands">
       <div class="ui-top">
         <span class="wm alarm">sulku<svg viewBox="0 0 38 100" aria-hidden="true"><path d="M0 0H38V100H0V89H27V11H0Z"/></svg></span>
-        <nav><b>Windows</b><span>Markets</span><span>Veikkaus</span><span>Reports</span><span>Rules</span></nav>
-        <span class="ctx">Your brand FI, today, 17:44</span>
+        <nav><b>Windows</b><span>Markets</span><span>Brands</span><span>Reports</span><span>Rules</span></nav>
+        <span class="ctx">All brands, today, 17:44</span>
       </div>
       <div class="ui-sum">
         <h4>Three prices are wrong right now. Brighton – Wolves is the most expensive.</h4>
@@ -280,22 +407,33 @@ h1, h2, h3 { text-wrap: balance; }
       </div>
       <div class="ui-tbl">
         <table>
-          <thead><tr><th>Match</th><th>Selection</th><th class="n">Yours</th><th class="n">Fair</th><th class="n">Veikkaus</th><th>Status</th><th class="n">At risk</th></tr></thead>
+          <thead><tr><th>Match</th><th>Selection</th><th>Brand</th><th class="n">Yours</th><th class="n">Fair</th><th class="n">Market best</th><th>Status</th><th class="n">At risk</th></tr></thead>
           <tbody>
-            <tr class="open"><td><span class="m">Brighton – Wolves</span><span class="l">Premier League, 19:00</span></td><td>Brighton</td><td class="n hi">1.83</td><td class="n">1.74</td><td class="n">1.76</td><td class="st">Open for 52 min</td><td class="n r">860 €</td></tr>
-            <tr class="open"><td><span class="m">Rangers – Devils</span><span class="l">NHL, 02:00</span></td><td>Devils</td><td class="n hi">3.45</td><td class="n">3.20</td><td class="n">3.30</td><td class="st">Open for 23 min</td><td class="n r">310 €</td></tr>
-            <tr class="open"><td><span class="m">HJK – Ilves</span><span class="l">Veikkausliiga, 19:00</span></td><td>Draw</td><td class="n hi">3.90</td><td class="n">3.66</td><td class="n">3.60</td><td class="st">Open, fair price paused</td><td class="n r">190 €</td></tr>
-            <tr><td><span class="m">Bruins – Maple Leafs</span><span class="l">NHL, 02:30</span></td><td>Maple Leafs</td><td class="n">3.70</td><td class="n">3.68</td><td class="n">3.75</td><td class="st">Fixed by Mikko, 17:05</td><td class="n">140 €</td></tr>
-            <tr><td><span class="m">Dortmund – Leipzig</span><span class="l">Bundesliga, 21:30</span></td><td>Dortmund</td><td class="n">2.38</td><td class="n">2.41</td><td class="n">2.35</td><td class="st">Watching</td><td class="n">–</td></tr>
+            <tr class="open"><td><span class="m">Brighton – Wolves</span><span class="l">Premier League, 19:00</span></td><td>Brighton</td><td>Brand A</td><td class="n hi">1.83</td><td class="n">1.74</td><td class="n">1.80</td><td class="st">Open for 52 min</td><td class="n r">860 €</td></tr>
+            <tr class="open"><td><span class="m">Rangers – Devils</span><span class="l">NHL, 01:00</span></td><td>Devils</td><td>Brand A and Brand B</td><td class="n hi">3.45</td><td class="n">3.20</td><td class="n">3.40</td><td class="st">Open for 23 min</td><td class="n r">310 €</td></tr>
+            <tr class="open"><td><span class="m">Leeds – Fulham</span><span class="l">Premier League, 20:00</span></td><td>Draw</td><td>Brand C</td><td class="n hi">3.90</td><td class="n">3.66</td><td class="n">3.75</td><td class="st">Open, fair price paused</td><td class="n r">190 €</td></tr>
+            <tr><td><span class="m">Bruins – Maple Leafs</span><span class="l">NHL, 01:30</span></td><td>Maple Leafs</td><td>Brand B</td><td class="n">3.70</td><td class="n">3.68</td><td class="n">3.75</td><td class="st">Fixed by Mikko, 17:05</td><td class="n">140 €</td></tr>
+            <tr><td><span class="m">Dortmund – Leipzig</span><span class="l">Bundesliga, 20:30</span></td><td>Dortmund</td><td>Brand A</td><td class="n">2.38</td><td class="n">2.41</td><td class="n">2.40</td><td class="st">Watching</td><td class="n">–</td></tr>
           </tbody>
         </table>
       </div>
     </div>
-    <p class="small ui-cap">Example screen. Matches, prices and figures are illustrative.</p>
-    <div class="trio">
-      <div><h3>Alerts in plain words</h3><p>A time, the match, one sentence, the money. To your trading channel and to whoever is on shift.</p></div>
-      <div><h3>Who fixed it, and when</h3><p>When someone moves the price, the row says who and how long after the alert. The Monday report counts it.</p></div>
-      <div><h3>Veikkaus in every row</h3><p>The incumbent is the price Finnish bettors know. Every row shows where you stand against it.</p></div>
+    <p class="small ui-cap">Example screen. Matches, brands, prices and figures are illustrative.</p>
+
+    <div class="below">
+      <div>
+        <div class="alert" role="img" aria-label="Example alert message">
+          <div class="who"><span class="wm alarm">sulku<svg viewBox="0 0 38 100" aria-hidden="true"><path d="M0 0H38V100H0V89H27V11H0Z"/></svg></span><span>17:44</span></div>
+          <p><b>Brighton – Wolves, Brighton at 1.83 on Brand A.</b> Fair price 1.74, open for 52 min, <b class="r">860 € at risk</b>.</p>
+          <p>The sharp market moved at 16:52. Your price has not.</p>
+        </div>
+        <p class="small ui-cap">Example alert. Illustrative.</p>
+      </div>
+      <div class="trio">
+        <div><h3>Alerts in plain words</h3><p>A time, the match, one sentence, the money. To your trading channel and to whoever is on shift.</p></div>
+        <div><h3>Who fixed it, and when</h3><p>When someone moves the price, the row would say who and how long after the alert, and the weekly report would count it.</p></div>
+        <div><h3>One alert per price</h3><p>Brands that share a price would come through as one row, with the brands listed. Brands priced on their own would be watched on their own.</p></div>
+      </div>
     </div>
   </div>
 </section>
@@ -306,22 +444,91 @@ h1, h2, h3 { text-wrap: balance; }
       <div class="a4">
         <div class="page">
           <span class="wm">sulku<svg viewBox="0 0 38 100" aria-hidden="true"><path d="M0 0H38V100H0V89H27V11H0Z"/></svg></span>
-          <div class="ttl"><b>Leakage report</b><span>Your brand FI, week 43, 19–25 October 2026</span></div>
-          <div><svg id="kv-mini" aria-hidden="true"></svg><div class="big">142</div><p class="cap">windows open last week, 61 of them after an alert</p></div>
+          <div class="ttl"><b>Leakage report</b><span>Your brands, week 43, 19–25 October 2026</span></div>
+          <div><svg id="kv-mini" aria-hidden="true"></svg><div class="big">3 420 €</div><p class="cap">given away last week by slow prices, across 142 windows</p></div>
           <div class="ft"><span>Confidential</span><span>sulkudata.com</span></div>
         </div>
         <p class="small" style="margin:14px 0 0">Example report cover. Figures are illustrative.</p>
       </div>
       <div>
         <p class="kicker">The report</p>
-        <h2>The bill, every Monday</h2>
+        <h2>The bill, every week</h2>
         <ul class="rep-list">
-          <li><h3>One figure on the front</h3><p>What last week's slow prices gave away, and how much of it your desk closed after an alert.</p></li>
-          <li><h3>Where it came from</h3><p>Which leagues and which hours. Usually a few competitions and one or two shifts account for most of it.</p></li>
+          <li><h3>One figure on the front</h3><p>What last week's slow prices gave away, and how much of it your desk closed.</p></li>
+          <li><h3>Where it came from</h3><p>Which brands, leagues and hours. In our sample, lower-profile football and overnight North American sport stood out.</p></li>
           <li><h3>The windows themselves</h3><p>Each with the time it opened, how long it stayed and the fair price at the time, so your traders can check every line against their own logs.</p></li>
-          <li><h3>Against Veikkaus</h3><p>How your Finnish prices compared with the local incumbent, league by league.</p></li>
+          <li><h3>Against your local market</h3><p>How your prices compared with the other books your customers see, market by market and league by league.</p></li>
         </ul>
       </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec tint" id="ways">
+  <div class="wrap">
+    <div class="split">
+      <div>
+        <p class="kicker">Deployment</p>
+        <h2>Two ways to run it</h2>
+      </div>
+      <p class="intro">Start from the outside with nothing to install. Move it inside your platform when you want it on your own price stream.</p>
+    </div>
+    <div class="ways">
+      <div class="way">
+        <h3>As a service</h3>
+        <p class="lead">We read the prices your customers see and run everything on our side.</p>
+        <dl>
+          <div><dt>Your side</dt><dd>Nothing to install. A channel for alerts and someone to read the weekly report.</dd></div>
+          <div><dt>Coverage</dt><dd>Pre-match match-winner and 1X2 markets, per brand and per market.</dd></div>
+          <div><dt>Speed</dt><dd>Built for minutes. Enough for pre-match, where seven windows in ten stayed open for five minutes or more.</dd></div>
+          <div><dt>Start</dt><dd>A report on your own prices, built from the prices your customers see.</dd></div>
+        </dl>
+      </div>
+      <div class="way">
+        <h3>Inside your platform</h3>
+        <p class="lead">The same engine would run in your environment, on your own price stream.</p>
+        <dl>
+          <div><dt>Your side</dt><dd>Access to your price stream, and to stake data if you want exact figures.</dd></div>
+          <div><dt>Coverage</dt><dd>Could cover every market you price, in-play included.</dd></div>
+          <div><dt>Speed</dt><dd>Would work in seconds, which is what in-play needs: a goal moves the fair price at once.</dd></div>
+          <div><dt>Start</dt><dd>After a period as a service, so both sides know what it finds.</dd></div>
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="next">
+  <div class="wrap">
+    <div class="split">
+      <div>
+        <p class="kicker">Beyond the window</p>
+        <h2>What it can extend to</h2>
+      </div>
+      <p class="intro">The fair price is the core. Once it runs next to your prices, the same comparison answers other questions your trading and risk teams ask.</p>
+    </div>
+    <ul class="ext">
+      <li><h3>Reaction time in-play</h3><p>How many seconds your in-play price would stay behind after a goal or a red card, and how long the market stays suspended, match by match.</p></li>
+      <li><h3>Which accounts take the stale prices</h3><p>With stake data, each window can be linked to the bets placed into it, so risk sees which accounts find your slow prices first.</p></li>
+      <li><h3>Odds boosts</h3><p>How far each boosted price sits above the fair price, and what the boosts cost against what they were meant to cost.</p></li>
+      <li><h3>New markets and brands</h3><p>One engine with markets as configuration. A new market means choosing the books, leagues, currency and thresholds; the method stays the same.</p></li>
+    </ul>
+  </div>
+</section>
+
+<section class="sec" id="markets">
+  <div class="wrap">
+    <div class="split">
+      <div>
+        <p class="kicker">Markets</p>
+        <h2>Wherever there is a sharp price to measure against</h2>
+      </div>
+      <p class="intro">Two brands on one engine can still price differently: in our sample, 60 % of closing prices differed between two sites running the same engine. So Sulku is built to measure what a customer of each brand actually sees.</p>
+    </div>
+    <div class="mk">
+      <div><h3>Any market</h3><p>Built to read the prices customers in a market see, in its currency and its leagues, with thresholds set for it.</p></div>
+      <div><h3>Every brand</h3><p>Brands priced on their own would be measured on their own, and brands that share a price measured once.</p></div>
+      <div><h3>Your leagues</h3><p>Local leagues included, as long as the sharp market prices them.</p></div>
     </div>
   </div>
 </section>
@@ -331,30 +538,13 @@ h1, h2, h3 { text-wrap: balance; }
     <p class="kicker">How we count</p>
     <h2>Questions traders ask first</h2>
     <div class="qa">
-      <details open><summary>Which fair price do you use?</summary><div class="a"><p>Pinnacle's, with its margin removed by the power method. A simple proportional split overstates the chance of outsiders; the power method doesn't, so long odds don't inflate the numbers.</p><p>Alerts use the price at that moment. The Monday report also checks every window against the closing price, the best estimate of the true chance there is.</p></div></details>
-      <details><summary>Isn't most overpricing just news we couldn't have known?</summary><div class="a"><p>Most of it, yes. Line-ups, injuries and goalies move the market after your price is set. In our sample about three windows in ten were visible at the time. Those are the ones we bill, because they are the ones a value bettor uses and the ones your desk can close.</p></div></details>
-      <details><summary>Do you need access to our systems?</summary><div class="a"><p>No. We read the prices your Finnish customers see. If you share stake data, the report turns estimated value into exact figures, but it isn't needed to start. If you would rather run Sulku inside your own platform on your own feeds, that works too.</p></div></details>
-      <details><summary>What counts as a window?</summary><div class="a"><p>A price that stays above the sharp market's fair price after the market has moved, for long enough that a bettor can take it. Thresholds are set per sport and price band, and tuned with your desk.</p></div></details>
-      <details><summary>Which competitions?</summary><div class="a"><p>Match-winner and 1X2 markets the sharp market prices: football, ice hockey, basketball, tennis, American football and more, Veikkausliiga included.</p></div></details>
-      <details><summary>Does it work outside Finland?</summary><div class="a"><p>Yes. The same detection runs in any market with a sharp reference price, so adding a market or a brand is configuration, not a new project. Finland is where we started.</p></div></details>
+      <details open><summary>Which fair price do you use?</summary><div class="a"><p>Pinnacle's, with its margin removed by the power method. A simple proportional split overstates the chance of outsiders; the power method doesn't, so long odds don't inflate the numbers.</p><p>Alerts would use the price at that moment. The report also checks every window against the closing price, the market's final and most informed view of the chance.</p></div></details>
+      <details><summary>How is this different from an odds screen?</summary><div class="a"><p>A screen shows where you are highest against other books. When books share an engine they are often wrong together: in the Finnish sample, between 43 % and 94 % of one site's windows were open at the same moment on another site using the same engine. A comparison with other books shows nothing there. A comparison with the fair price does.</p></div></details>
+      <details><summary>Isn't most overpricing just news we couldn't have known?</summary><div class="a"><p>Most of it, yes. Line-ups, injuries and goalies move the market after your price is set. In our sample about three windows in ten were visible at the time. Those are the ones we count, because they are the ones a value bettor uses and the ones your desk can close.</p></div></details>
+      <details><summary>Do you need access to our systems?</summary><div class="a"><p>No. We read the prices your customers see. If you share stake data, the report would turn estimated value into exact figures, but it isn't needed to start. Sulku could also run inside your own platform on your own feeds.</p></div></details>
+      <details><summary>What counts as a window?</summary><div class="a"><p>In the sample: a price at least 2 % above the sharp market's fair price at that moment, and still at least 2 % above the fair price at kick-off. For your desk, the thresholds would be tuned per sport and price band.</p></div></details>
+      <details><summary>Which competitions?</summary><div class="a"><p>Match-winner and 1X2 markets the sharp market prices: football, ice hockey, basketball, tennis, American football and more, local leagues included.</p></div></details>
       <details><summary>Will you show our numbers to anyone else?</summary><div class="a"><p>No. Each report is for one operator about its own prices. Public figures on this page are ranges across six sites, with no site named.</p></div></details>
-    </div>
-  </div>
-</section>
-
-<section class="sec" id="finland">
-  <div class="wrap">
-    <div class="fi-grid">
-      <div>
-        <p class="kicker">Finland</p>
-        <h2>Built in Tampere for 1 July 2027</h2>
-        <p class="intro">Finland's licensed market opens on 1 July 2027. Sulku is made here, for the sportsbooks coming in, and it is ready before the market is.</p>
-      </div>
-      <ul class="fi-list">
-        <li><h3>Your Finnish prices, read from your Finnish site</h3><p>The same operator prices Finland differently from Sweden or the UK, and two brands on one engine still differ. We measure what a Finnish customer actually sees.</p></li>
-        <li><h3>Before launch: your current market</h3><p>Until your Finnish site is live, we measure a market you already run, so the desk has a baseline on day one.</p></li>
-        <li><h3>In English or Finnish</h3><p>Reports, alerts and questions in either language, at the hours your desk works.</p></li>
-      </ul>
     </div>
   </div>
 </section>
@@ -364,7 +554,7 @@ h1, h2, h3 { text-wrap: balance; }
   <div class="wrap">
     <div>
       <h2>Start with a report on your own prices.</h2>
-      <p>Tell us which brand and which market you run today. We send back what your slow prices gave away, the same way the Monday report does.</p>
+      <p>Tell us which brands and which markets you run. We send back what your slow prices gave away, in the same form as the weekly report.</p>
     </div>
     <div class="mail">
       <span class="note">Write to</span>
@@ -377,45 +567,91 @@ h1, h2, h3 { text-wrap: balance; }
 <footer class="foot">
   <div class="wrap">
     <span class="wm">sulku<svg viewBox="0 0 38 100" aria-hidden="true"><path d="M0 0H38V100H0V89H27V11H0Z"/></svg></span>
-    <span>Sulku, Tampere, Finland. Figures from Finnish-facing prices, 30 September – 19 October 2026.</span>
+    <span>Sulku, Tampere, Finland. Figures from the Finnish-facing prices of six sportsbooks, 30 September – 19 October 2026.</span>
   </div>
 </footer>
 
 <script>
 (function () {
-  // Calgary Flames – Carolina Hurricanes, one Finnish site: [start, end, site price, fair price now] (epoch s)
-  const K = { alkaa: 1792368600, ikkuna: [1792347125, 1792367165], pts: [[1792347125, 1792356844, 4.25, 4.002], [1792356844, 1792359483, 4.25, 4.04], [1792359483, 1792360385, 4.25, 4.076], [1792360385, 1792365064, 4.25, 4.119], [1792365064, 1792367165, 4.25, 4.122], [1792367165, 1792367584, 4.2, 4.122], [1792367584, 1792367764, 4.25, 4.122], [1792367764, 1792367943, 4.3, 3.947], [1792367943, 1792368600, 4.1, 3.947]] };
+  // Washington Capitals – New York Rangers, NHL, one Finnish-facing site (18_asiakkaat.json, nordicbet.sarja_paa):
+  // [start, end, site price, fair price now] (epoch s); window 20:46–21:58 Finnish time, puck drop 02:15, fair at close 2.946
+  const K = { alkaa: 1791587700, ikkuna: [1791567969, 1791572287], sulku: 2.946, pts: [[1791565806, 1791567729, 3.1, 3.143], [1791567728, 1791567969, 3.15, 3.143], [1791567969, 1791568209, 3.15, 2.979], [1791568207, 1791570731, 3.1, 2.979], [1791570731, 1791572287, 3.1, 3.0], [1791572287, 1791572527, 3.0, 3.0], [1791572527, 1791573488, 3.0, 2.998], [1791573488, 1791575224, 3.0, 3.02], [1791575224, 1791580744, 3.0, 3.003], [1791580685, 1791581645, 2.9, 3.003], [1791581584, 1791584884, 2.85, 3.003], [1791584824, 1791585185, 2.8, 3.003], [1791585125, 1791585185, 2.85, 3.003], [1791585185, 1791585192, 2.8, 2.921], [1791585185, 1791585845, 2.85, 2.921], [1791585785, 1791586085, 2.8, 2.921], [1791586085, 1791587104, 2.8, 2.941], [1791587104, 1791587405, 2.8, 2.946]] };
+  // 18_ikkunat.csv: windows by duration, and by opening hour (Europe/Helsinki) as [football, ice hockey, other]
+  const DUR = [["Under 5 min", 309], ["5–15 min", 249], ["15–60 min", 267], ["1–3 h", 95], ["Over 3 h", 100]];
+  const HRS = [[22, 15, 9], [15, 36, 18], [22, 24, 10], [14, 10, 20], [8, 7, 11], [8, 4, 14], [2, 0, 1], [33, 0, 4], [31, 0, 5], [19, 0, 10], [28, 0, 5], [34, 1, 6], [23, 1, 1], [44, 2, 6], [25, 1, 7], [47, 2, 4], [49, 7, 3], [60, 11, 4], [43, 6, 6], [21, 8, 7], [35, 26, 9], [52, 6, 2], [9, 5, 6], [14, 17, 5]];
   const hel = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Helsinki", hour: "2-digit", minute: "2-digit", hour12: false });
   const day = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Helsinki", weekday: "short" });
   const F = 'font-family="Schibsted Grotesk, Arial"';
   let pid = 0;
-  function draw(svg, full) {
-    const W = Math.round(svg.getBoundingClientRect().width); if (!W) return;
-    const inner = Math.min(W, 1120), pad = full ? Math.max((W - inner) / 2 + (W < 480 ? 16 : 24), 16) : 0;
-    const H = full ? (W < 600 ? 240 : 320) : 104, T = full ? 70 : 42, B = full ? 34 : 4;
-    const t0 = K.pts[0][0] - 3600, t1 = K.alkaa, lo = 3.85, hi = 4.40;
-    const x = t => pad + (t - t0) / (t1 - t0) * (W - 2 * pad), y = o => T + (hi - o) / (hi - lo) * (H - T - B);
-    const step = k => K.pts.map((p, i) => `${i ? "L" : "M"}${x(p[0]).toFixed(1)} ${y(p[k]).toFixed(1)}H${x(p[1]).toFixed(1)}`).join("");
+  const width = svg => Math.round(svg.getBoundingClientRect().width);
+
+  // the window as a price line; mode "shot" (hero screen, night), "mini" (report cover, lake), "anat" (tint, with markers)
+  function line(svg, mode) {
+    const W = width(svg); if (!W) return;
+    const shot = mode === "shot", anat = mode === "anat", mini = mode === "mini";
+    const pad = shot ? 18 : (anat ? 8 : 0);
+    const H = shot ? (W < 500 ? 190 : 230) : anat ? (W < 600 ? 260 : 320) : 104;
+    const T = mini ? 40 : 64, B = mini ? 4 : 34;
+    const ink = anat ? "#111316" : (shot ? "#e9ebe7" : "#fff"), soft = anat ? "#737b75" : (shot ? "#8f978f" : "#a3b6ca");
+    const rule = anat ? "#e2e5e1" : "#2a2e33", red = anat ? "#d1391d" : "#ff5a3c";
+    const t0 = K.pts[0][0], t1 = shot ? 1791577800 : K.alkaa + (anat ? 600 : 0), lo = 2.70, hi = 3.25;
+    const x = t => pad + (Math.min(t, t1) - t0) / (t1 - t0) * (W - 2 * pad), y = o => T + (hi - o) / (hi - lo) * (H - T - B);
+    const step = k => K.pts.filter(p => p[0] < t1).map((p, i) => `${i ? "L" : "M"}${x(p[0]).toFixed(1)} ${y(p[k]).toFixed(1)}H${x(p[1]).toFixed(1)}`).join("");
     const id = "h" + pid++;
-    let s = `<defs><pattern id="${id}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#ff5a3c" stroke-width="1.3"/></pattern></defs>`;
-    if (full) {
-      [4.0, 4.25].forEach(o => { s += `<line x1="0" x2="${W}" y1="${y(o)}" y2="${y(o)}" stroke="#2d4e70"/><text x="${pad}" y="${y(o) + 17}" font-size="12" fill="#a3b6ca" ${F}>${o.toFixed(2)}</text>`; });
-      const ticks = W < 600 ? [1792350000, 1792360800] : [1792346400, 1792353600, 1792360800, 1792364400];
-      ticks.forEach(t => { const l = hel.format(t * 1000); s += `<text x="${x(t)}" y="${H - 8}" text-anchor="middle" font-size="12" fill="#a3b6ca" ${F}>${l === "00:00" || t === ticks[0] ? day.format(t * 1000) + " " : ""}${l}</text>`; });
-      s += `<text x="${W - pad}" y="${H - 8}" text-anchor="end" font-size="12" fill="#fff" ${F}>Puck drop 03:10</text>`;
+    let s = `<defs><pattern id="${id}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="${red}" stroke-width="1.3"/></pattern></defs>`;
+    if (!mini) {
+      [3.0, 3.15].forEach(o => { s += `<line x1="${pad}" x2="${W - pad}" y1="${y(o)}" y2="${y(o)}" stroke="${rule}"/><text x="${W - pad}" y="${y(o) - 6}" text-anchor="end" font-size="12" fill="${soft}" ${F}>${o.toFixed(2)}</text>`; });
+      // Finnish time (UTC+3): 21:00, 22:00, 23:00 on the hero screen; 21:00, 23:00, 01:00 elsewhere
+      const ticks = shot ? [1791568800, 1791572400, 1791576000] : (W < 500 ? [1791568800, 1791583200] : [1791568800, 1791576000, 1791583200]);
+      ticks.forEach(t => { s += `<text x="${x(t)}" y="${H - 10}" text-anchor="middle" font-size="12" fill="${soft}" ${F}>${day.format(t * 1000)} ${hel.format(t * 1000)}</text>`; });
+      if (!shot) s += `<text x="${W - pad}" y="${H - 10}" text-anchor="end" font-size="12" fill="${ink}" ${F}>Puck drop 02:15</text>`;
     }
     let r = "";
     K.pts.forEach(p => { const a = Math.max(p[0], K.ikkuna[0]), b = Math.min(p[1], K.ikkuna[1]); if (b > a && p[2] > p[3]) r += `<rect x="${x(a)}" y="${y(p[2])}" width="${x(b) - x(a)}" height="${y(p[3]) - y(p[2])}"/>`; });
-    s += `<g fill="url(#${id})" opacity=".8">${r}</g>`;
-    s += `<path d="${step(3)}" fill="none" stroke="#a3b6ca" stroke-width="1.5" stroke-dasharray="4 4"/>`;
-    s += `<path d="${step(2)}" fill="none" stroke="#fff" stroke-width="${full ? 2.5 : 2}"/>`;
-    const a = x(K.ikkuna[0]), b = x(K.ikkuna[1]), by = T - (full ? 26 : 16), lg = full ? 12 : 8;
-    s += `<path d="M${a} ${by + lg}V${by}H${b}V${by + lg}" fill="none" stroke="#ff5a3c" stroke-width="${full ? 3 : 2.5}"/>`;
-    s += `<text x="${(a + b) / 2}" y="${by - 8}" text-anchor="middle" font-size="${full ? (W < 600 ? 14 : 16) : 13}" font-weight="600" fill="#ff5a3c" ${F}>${full ? "Open at least 5 h 34 min, 7,7 % edge" : "≥ 5 h 34 min"}</text>`;
+    s += `<g fill="url(#${id})" opacity=".85">${r}</g>`;
+    s += `<path d="${step(3)}" fill="none" stroke="${soft}" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+    s += `<path d="${step(2)}" fill="none" stroke="${ink}" stroke-width="${mini ? 2 : 2.5}"/>`;
+    const a = x(K.ikkuna[0]), b = x(K.ikkuna[1]), by = T - (mini ? 14 : 24), lg = mini ? 8 : 12;
+    s += `<path d="M${a} ${by + lg}V${by}H${b}V${by + lg}" fill="none" stroke="${red}" stroke-width="${mini ? 2.5 : 3}"/>`;
+    s += `<text x="${a}" y="${by - 8}" font-size="${mini ? 12 : (W < 500 ? 13 : 15)}" font-weight="600" fill="${red}" ${F}>${mini ? "72 min" : "Open 72 min, 6,9 % edge"}</text>`;
+    if (anat) {
+      [[K.ikkuna[0], 1], [K.ikkuna[1], 0], [K.alkaa, 0]].forEach(([t, hot]) => { const xx = x(t); s += `<line x1="${xx}" x2="${xx}" y1="${T - 4}" y2="${H - B + 4}" stroke="${hot ? red : "#111316"}" stroke-width="1" ${hot ? "" : 'stroke-dasharray="2 3"'}/>`; });
+      s += `<circle cx="${x(K.alkaa)}" cy="${y(K.sulku)}" r="4" fill="#111316"/><text x="${x(K.alkaa) - 8}" y="${y(K.sulku) - 10}" text-anchor="end" font-size="12" fill="#111316" ${F}>Fair at close 2.95</text>`;
+    }
     svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.setAttribute("height", H); svg.innerHTML = s;
   }
-  const kv = document.getElementById("kv"), mini = document.getElementById("kv-mini");
-  const all = () => { draw(kv, true); draw(mini, false); };
+
+  function durations(svg) {
+    const W = width(svg); if (!W) return;
+    const rowH = 46, L = W < 420 ? 92 : 112, R = 64, H = DUR.length * rowH, max = Math.max(...DUR.map(d => d[1])), n = DUR.reduce((a, d) => a + d[1], 0);
+    let s = "";
+    DUR.forEach(([lab, v], i) => {
+      const y0 = i * rowH, w = (W - L - R) * v / max;
+      s += `<text x="0" y="${y0 + 26}" font-size="14" fill="#41474e" ${F}>${lab}</text>`;
+      s += `<rect x="${L}" y="${y0 + 10}" width="${w.toFixed(1)}" height="22" fill="${i >= 3 ? "#173a5e" : "#7d98b3"}"/>`;
+      s += `<text x="${L + w + 8}" y="${y0 + 26}" font-size="14" font-weight="600" fill="#111316" ${F}>${Math.round(100 * v / n)} %</text>`;
+    });
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.setAttribute("height", H); svg.innerHTML = s;
+  }
+
+  function hours(svg) {
+    const W = width(svg); if (!W) return;
+    const H = W < 500 ? 200 : 240, T = 8, B = 26, L = 26, cols = ["#173a5e", "#7d98b3", "#c9cec8"];
+    const max = Math.max(...HRS.map(h => h[0] + h[1] + h[2])), top = Math.ceil(max / 20) * 20, bw = (W - L) / 24;
+    const y = v => T + (H - T - B) * (1 - v / top);
+    let s = `<rect x="${L}" y="${T}" width="${bw * 8}" height="${H - T - B}" fill="#e2e5e1" opacity=".55"/>`;
+    [0, 40, 80].filter(v => v <= top).forEach(v => { s += `<line x1="${L}" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="#c9cec8" stroke-width="${v ? .7 : 1}"/><text x="0" y="${y(v) + 4}" font-size="11" fill="#737b75" ${F}>${v}</text>`; });
+    HRS.forEach((h, i) => {
+      let acc = 0;
+      h.forEach((v, k) => { if (!v) return; const y1 = y(acc + v), y0 = y(acc); s += `<rect x="${(L + i * bw + 1.5).toFixed(1)}" y="${y1.toFixed(1)}" width="${(bw - 3).toFixed(1)}" height="${(y0 - y1).toFixed(1)}" fill="${cols[k]}"/>`; acc += v; });
+    });
+    [0, 6, 12, 18].forEach(t => { s += `<text x="${L + t * bw + bw / 2}" y="${H - 8}" text-anchor="middle" font-size="12" fill="#737b75" ${F}>${String(t).padStart(2, "0")}:00</text>`; });
+    s += `<text x="${L + 4 * bw}" y="${T + 16}" text-anchor="middle" font-size="12" fill="#41474e" ${F}>00:00–08:00</text>`;
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.setAttribute("height", H); svg.innerHTML = s;
+  }
+
+  const kv = document.getElementById("kv"), mini = document.getElementById("kv-mini"), an = document.getElementById("anat");
+  const all = () => { line(kv, "shot"); line(mini, "mini"); line(an, "anat"); durations(document.getElementById("dur")); hours(document.getElementById("hrs")); };
   all();
   let tm; addEventListener("resize", () => { clearTimeout(tm); tm = setTimeout(all, 120); });
   if (document.fonts) document.fonts.ready.then(all);
