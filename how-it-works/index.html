@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How stale price detection works | Sulku</title>
+<meta name="description" content="How Sulku measures sportsbook prices against the sharp market's fair price, what counts as a window, and why odds screens that compare books miss it.">
+<link rel="canonical" href="https://sulkudata.com/how-it-works/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Sulku">
+<meta property="og:locale" content="en_GB">
+<meta property="og:url" content="https://sulkudata.com/how-it-works/">
+<meta property="og:title" content="How stale price detection works | Sulku">
+<meta property="og:description" content="How Sulku measures sportsbook prices against the sharp market's fair price, what counts as a window, and why odds screens that compare books miss it.">
+<meta property="og:image" content="https://sulkudata.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#173a5e">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/brand/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/assets/site.css">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "Organization",
+   "@id": "https://sulkudata.com/#org",
+   "name": "Sulku",
+   "url": "https://sulkudata.com/",
+   "logo": "https://sulkudata.com/brand/sulku-wordmark-ink.png",
+   "email": "jami@sulkudata.com",
+   "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Tampere",
+    "addressCountry": "FI"
+   },
+   "description": "Stale price detection for sportsbooks: published prices measured against the sharp market's fair price.",
+   "founder": {
+    "@type": "Person",
+    "name": "Jami Jokinen",
+    "jobTitle": "Founder"
+   }
+  },
+  {
+   "@type": "FAQPage",
+   "mainEntity": [
+    {
+     "@type": "Question",
+     "name": "Which fair price do you use?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "The sharp market's price with its margin removed. Sulku follows it as it moves, so a window opens against the fair price at that moment, not against yesterday's. Each window is also checked against the fair price at kick-off, the market's final and best-informed view of the chance."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Isn't most of this just news you couldn't have known?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Much of it, yes. Line-ups, injuries and goalies move the market after your price is set. Sulku counts the windows that stayed open after the sharp market had already moved: the ones a value bettor uses, and the ones your desk can close."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "What counts as a window?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "A price of yours above the fair price after the sharp market moved, for long enough to act on, and still above the fair price at kick-off. The levels are set with your traders, per sport and price band."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Do you need access to our systems?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "No. Sulku starts from the prices your customers see. With your own price feed it can work in seconds and cover in-play, as a service or inside your platform."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Which sports and markets?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Today the match result in football, ice hockey, basketball, tennis, American football and more, local leagues included where the sharp market prices them. More bet types and competitions can be added for your desk."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Does Sulku change our prices?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "No. Sulku shows your traders which prices are behind; your traders decide what to do. Correcting prices automatically, within limits your traders set, could come later on your own feed."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Will you show our numbers to anyone else?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "No. Everything Sulku finds on your prices is for you only. Public figures on this site are totals across many sportsbooks, with none of them named."
+     }
+    }
+   ]
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "Home",
+     "item": "https://sulkudata.com/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "How it works",
+     "item": "https://sulkudata.com/how-it-works/"
+    }
+   ]
+  }
+ ]
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head on-lake">
+  <div class="wrap">
+    <a class="wm" href="/" aria-label="Sulku, home">sulku<svg viewBox="0 0 38 100" aria-hidden="true"><path d="M0 0H38V100H0V89H27V11H0Z"/></svg></a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+    <nav class="nav" id="nav" aria-label="Main"><a href="/product/">Product</a><a href="/services/">Services</a><a href="/how-it-works/" aria-current="page">How it works</a><a href="/pilot/">Pilot</a><a href="/about/">About</a></nav>
+    <a class="btn btn-ink" href="/contact/">Book a demo</a>
+  </div>
+</header>
+<main id="main">
+<section class="page-head on-lake">
+  <div class="wrap">
+    <div>
+      <nav class="crumb" aria-label="Breadcrumb"><a href="/">Home</a> / How it works</nav>
+      <h1>Fair price first, then your price.</h1>
+    </div>
+    <div>
+      <p class="lead">How Sulku decides that a price is behind, and why it compares you with the sharp market rather than with other books.</p>
+      <svg class="line" data-line="lake" role="img" aria-label="A real window: one sportsbook's price on the Rangers stayed above the fair price for 72 minutes."></svg>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="split">
+      <div><p class="kicker">The method in four steps</p><h2>From the sharp market to the bill.</h2></div>
+      <p class="intro">A window is a price of yours that stays above the fair price after the sharp market has moved. Sulku finds it, follows it until it closes, and checks it against the fair price at kick-off.</p>
+    </div>
+    <ol class="steps">
+      <li><span class="when">The fair price</span><h3>The sharp market, margin removed.</h3><p>The sharpest books' prices with their margin taken out, kept current for every selection we follow.</p></li>
+      <li><span class="when">Your price against it</span><h3>What your customers see.</h3><p>Read per brand and per market, and compared with the fair price at the same moment.</p></li>
+      <li><span class="when">The window</span><h3>Above fair, after the market moved.</h3><p>Opened when your price stays above the fair price long enough to matter, closed when it falls back in line.</p></li>
+      <li><span class="when">The bill</span><h3>Checked at kick-off.</h3><p>Every window is measured against the fair price at kick-off, the market's final and best-informed view.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="sec tint">
+  <div class="wrap">
+    <div class="split">
+      <div><p class="kicker">One real window</p><h2>Capitals – Rangers, 72 minutes behind.</h2></div>
+      <p class="intro">One sportsbook in our sample, 9 October 2026. Its price solid, the fair price dashed, the open window hatched in red. Times in UTC.</p>
+    </div>
+    <div class="anat-fig">
+      <svg data-anatomy role="img" aria-label="The sportsbook's price on the Rangers stayed at 3.15 and 3.10 from 17:46 to 18:58 UTC while the fair price was 2.98 to 3.00, then moved to 3.00; the fair price at puck drop was 2.95."></svg>
+    </div>
+    <ol class="tl">
+      <li class="hot"><time>17:46</time><h3>The market moves. The price does not.</h3><p>The sharp market shortens the Rangers: their fair price drops from 3.14 to 2.98. The sportsbook still has them at 3.15.</p><div class="px"><span>Price <b class="r">3.15</b></span><span>Fair <b>2.98</b></span></div></li>
+      <li><time>17:50</time><h3>A small move, not enough.</h3><p>The price is trimmed to 3.10, still about 4 % above fair, and stays there for over an hour.</p><div class="px"><span>Price <b class="r">3.10</b></span><span>Fair <b>2.98 → 3.00</b></span></div></li>
+      <li><time>18:58</time><h3>Fixed, 72 minutes later.</h3><p>The price moves to 3.00, in line with the fair price. With an alert, the trader on shift could have seen it at 17:46.</p><div class="px"><span>Price <b>3.00</b></span><span>Fair <b>3.00</b></span></div></li>
+      <li><time>23:15</time><h3>Puck drop. The bill.</h3><p>The fair price at puck drop is 2.95. Bets at 3.15 carried a 6.9 % edge against the book, bets at 3.10 a 5.2 % edge.</p><div class="px"><span>Edge <b class="r">6.9 %</b></span></div></li>
+    </ol>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="split">
+      <div><p class="kicker">Why not an odds screen</p><h2>When the whole market is late, other books can't tell you.</h2></div>
+      <p class="intro">Sportsbooks that share a supplier or follow the same feed can be late together. A screen that compares you with them shows nothing. The fair price still shows the window.</p>
+    </div>
+    <div class="compare">
+      <div>
+        <h3>An odds screen</h3>
+        <p class="q">Am I above the other books?</p>
+        <dl>
+          <div><dt>Compares you with</dt><dd>Other sportsbooks</dd></div>
+          <div><dt>When the market is late</dt><dd>Shows nothing</dd></div>
+          <div><dt>Tells you</dt><dd>Where you are the highest</dd></div>
+        </dl>
+      </div>
+      <div class="yes">
+        <h3>Sulku</h3>
+        <p class="q">Is my price above the fair price, right now?</p>
+        <dl>
+          <div><dt>Compares you with</dt><dd>The sharp market's price, margin removed</dd></div>
+          <div><dt>When the market is late</dt><dd>Still shows the window</dd></div>
+          <div><dt>Tells you</dt><dd>Which price, for how long, and what it gave away</dd></div>
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec tint" id="questions">
+  <div class="wrap">
+    <p class="kicker">Questions</p>
+    <h2>What trading teams ask first.</h2>
+    <div class="qa">
+      <details open><summary>Which fair price do you use?</summary><div class="a"><p>The sharp market's price with its margin removed. Sulku follows it as it moves, so a window opens against the fair price at that moment, not against yesterday's.</p><p>Each window is also checked against the fair price at kick-off, the market's final and best-informed view of the chance.</p></div></details>
+      <details><summary>Isn't most of this just news you couldn't have known?</summary><div class="a"><p>Much of it, yes. Line-ups, injuries and goalies move the market after your price is set. Sulku counts the windows that stayed open after the sharp market had already moved: the ones a value bettor uses, and the ones your desk can close.</p></div></details>
+      <details><summary>What counts as a window?</summary><div class="a"><p>A price of yours above the fair price after the sharp market moved, for long enough to act on, and still above the fair price at kick-off. The levels are set with your traders, per sport and price band.</p></div></details>
+      <details><summary>Do you need access to our systems?</summary><div class="a"><p>No. Sulku starts from the prices your customers see. With your own price feed it can work in seconds and cover in-play, as a service or inside your platform.</p></div></details>
+      <details><summary>Which sports and markets?</summary><div class="a"><p>Today the match result in football, ice hockey, basketball, tennis, American football and more, local leagues included where the sharp market prices them. More bet types and competitions can be added for your desk.</p></div></details>
+      <details><summary>Does Sulku change our prices?</summary><div class="a"><p>No. Sulku shows your traders which prices are behind; your traders decide what to do. Correcting prices automatically, within limits your traders set, could come later on your own feed.</p></div></details>
+      <details><summary>Will you show our numbers to anyone else?</summary><div class="a"><p>No. Everything Sulku finds on your prices is for you only. Public figures on this site are totals across many sportsbooks, with none of them named.</p></div></details>
+    </div>
+  </div>
+</section>
+
+<section class="cta on-lake">
+  <div class="wrap">
+    <h2>See your own windows.</h2>
+    <div>
+      <p>Book a demo and we'll show what Sulku finds on your brands and markets.</p>
+      <div class="acts"><a class="btn btn-ink" href="/contact/">Book a demo</a><a class="btn btn-line" href="/product/">See the product</a></div>
+    </div>
+  </div>
+</section>
+</main>
+<footer class="site-foot on-lake">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div><a class="wm" href="/" aria-label="Sulku, home">sulku<svg viewBox="0 0 38 100" aria-hidden="true"><path d="M0 0H38V100H0V89H27V11H0Z"/></svg></a><p>Stale price detection for sportsbooks. Your published prices, measured against the sharp market's fair price.</p></div>
+      <div><p class="fh">Product</p><ul><li><a href="/product/#live">Live board</a></li><li><a href="/product/#alerts">Alerts</a></li><li><a href="/product/#history">History</a></li><li><a href="/product/#ledger">Ledger</a></li></ul></div>
+      <div><p class="fh">Company</p><ul><li><a href="/services/">Services</a></li><li><a href="/how-it-works/">How it works</a></li><li><a href="/pilot/">Pilot</a></li><li><a href="/about/">About</a></li><li><a href="/privacy/">Privacy</a></li></ul></div>
+      <div><p class="fh">Contact</p><ul><li><a href="mailto:jami@sulkudata.com">jami@sulkudata.com</a></li><li>Tampere, Finland</li></ul></div>
+    </div>
+    <div class="foot-base"><span>© 2026 Sulku</span><span>sulkudata.com</span></div>
+  </div>
+</footer>
+<script src="/assets/site.js" defer></script>
+</body>
+</html>
